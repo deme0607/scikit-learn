@@ -301,6 +301,8 @@ class MultiprocessingBackend(PoolManagerMixin, AutoBatchingMixin,
 
         already_forked = int(os.environ.get(self.JOBLIB_SPAWNED_PROCESS, 0))
         if already_forked:
+            warnings.warn("already_forked. pid: %s" % os.getpid())
+            """
             raise ImportError(
                 '[joblib] Attempting to do parallel computing '
                 'without protecting your import on a system that does '
@@ -309,6 +311,7 @@ class MultiprocessingBackend(PoolManagerMixin, AutoBatchingMixin,
                 "__name__ == '__main__'"
                 '". Please see the joblib documentation on Parallel '
                 'for more information')
+            """
         # Set an environment variable to avoid infinite loops
         os.environ[self.JOBLIB_SPAWNED_PROCESS] = '1'
 
@@ -319,10 +322,12 @@ class MultiprocessingBackend(PoolManagerMixin, AutoBatchingMixin,
         return n_jobs
 
     def terminate(self):
+        warnings.warn("terminate. pid: %d" % os.getpid())
         """Shutdown the process or thread pool"""
         super(MultiprocessingBackend, self).terminate()
         if self.JOBLIB_SPAWNED_PROCESS in os.environ:
             del os.environ[self.JOBLIB_SPAWNED_PROCESS]
+            warnings.warn("delete env. pid: %d" % os.getpid())
 
 
 class ImmediateResult(object):
